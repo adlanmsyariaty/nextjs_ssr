@@ -1,0 +1,25 @@
+{
+  "development": {
+    "username": "tryoutApp-user",
+    "password": "tryoutApp-password",
+    "database": "gofleet",
+    "host": "13.229.204.192",
+    "dialect": "postgres",
+    "port": 5432
+  },
+  "test": {
+    "username": "root",
+    "password": null,
+    "database": "database_test",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  },
+  "production": {
+    "use_env_variable": "DATABASE_URL",
+    "dialectOptions": {
+      "ssl": {
+        "rejectUnauthorized": false
+      }
+    }
+  }
+}
