@@ -9,7 +9,7 @@ export default function Home() {
         <p className="text-center text-white text-[28px] font-bold">SocioX</p>
       </div>
 
-      <div className=" bg-green-100 h-full sm:w-[600px] justify-center items-center mt-[38px] overflow-y-auto">
+      <div className=" bg-green-100 h-full sm:w-[750px] justify-center items-center mt-[38px] overflow-y-auto">
         <CreatePost />
         <PostList />
       </div>
