@@ -1,9 +1,9 @@
 {
   "development": {
-    "username": "tryoutApp-user",
-    "password": "tryoutApp-password",
-    "database": "gofleet",
-    "host": "13.229.204.192",
+    "username": "postgres-user",
+    "password": "postgres-password",
+    "database": "db",
+    "host": "127.0.0.1",
     "dialect": "postgres",
     "port": 5432
   },

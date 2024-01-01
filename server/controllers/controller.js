@@ -21,16 +21,18 @@ class Controller {
   }
   static async getAllPost(req, res, next) {
     try {
-      const page = parseInt(req.query.page) || 1;
-      const limit = parseInt(req.query.limit) || 10;
-      const posts = await Post.findAndCountAll({
+      const { page, limit } = req.query;
+      let filter = {
         where: {
           isActive: true,
         },
         order: [["createdAt", "DESC"]],
-        offset: (page - 1) * limit,
-        limit,
-      });
+      };
+      if (page && limit) {
+        filter.page = parseInt(page);
+        filter.limit = parseInt(limit);
+      }
+      const posts = await Post.findAndCountAll(filter);
 
       let postResp = posts.rows.map((post) => post.dataValues);
 
@@ -53,8 +55,8 @@ class Controller {
       const postData = await Post.findOne({
         where: {
           id: postId,
-          isActive: true
-        }
+          isActive: true,
+        },
       });
 
       if (!postData) throw { name: "POST_NOT_FOUND" };
