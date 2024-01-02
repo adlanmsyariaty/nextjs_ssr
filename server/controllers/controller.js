@@ -1,4 +1,7 @@
+const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
 const { Post } = require("../models");
+const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
+// const aws = require("aws-sdk");
 
 class Controller {
   static async createPost(req, res, next) {
@@ -75,6 +78,36 @@ class Controller {
         success: true,
         data: {
           id: postId,
+        },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+  static async createUploadPresignedUrl(req, res, next) {
+    try {
+      const accessKeyId = process.env.AWS_ACCESS_KEY;
+      const secretAccessKey = process.env.AWS_SECRET_KEY;
+      const bucket = process.env.AWS_BUCKET;
+      const region = process.env.AWS_REGION;
+      const key = new Date().getTime() + ".jpg";
+      const client = new S3Client({
+        region,
+        credentials: {
+          accessKeyId: accessKeyId,
+          secretAccessKey: secretAccessKey,
+        },
+      });
+      const command = new PutObjectCommand({ Bucket: bucket, Key: key });
+
+      const presignedUrl = await getSignedUrl(client, command, {
+        expiresIn: 3600,
+      });
+
+      res.status(200).json({
+        success: true,
+        data: {
+          url: presignedUrl,
         },
       });
     } catch (error) {
