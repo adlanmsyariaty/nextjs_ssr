@@ -1,8 +1,9 @@
 "use client";
 
 import DeletePost from "./DeletePost";
+import UpdatePost from "./UpdatePost";
 
-export default function Modal({ postId }) {
+export default function Modal({ post }) {
   return (
     <>
       <div className="dropdown dropdown-end">
@@ -26,7 +27,8 @@ export default function Modal({ postId }) {
           tabIndex={0}
           className="dropdown-content z-[1] menu p-2 shadow-lg rounded-box w-40 bg-teal-50"
         >
-          <DeletePost postId={postId} />
+          <UpdatePost post={post} />
+          <DeletePost postId={post.id} />
         </ul>
       </div>
     </>

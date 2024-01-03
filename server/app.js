@@ -14,7 +14,8 @@ app.use(express.urlencoded({ extended: true }));
 
 app.post("/posts", Controller.createPost);
 app.get("/posts", Controller.getAllPost);
-app.delete("/posts/:id/delete", Controller.deletePost);
+app.delete("/posts/:id", Controller.deletePost);
+app.put("/posts/:id", Controller.updatePost);
 app.post("/posts/presigned-url", Controller.createUploadPresignedUrl);
 app.use(errorHandlers);
 

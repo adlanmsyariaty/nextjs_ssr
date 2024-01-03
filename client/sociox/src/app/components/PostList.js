@@ -10,7 +10,7 @@ export default async function PostList() {
       {posts.data.items.length > 0 &&
         posts.data.items.map((post) => (
           <div
-            className="flex flex-col w-full bg-white border-2 border-emerald-100 p-4 rounded-xl"
+            className="flex flex-col w-full bg-white border-x-8 border-y-4 border-emerald-100 p-4 rounded-xl"
             key={post.id}
           >
             <div className="flex justify-between mb-2">
@@ -28,10 +28,13 @@ export default async function PostList() {
                 </div>
               </div>
 
-              <Modal postId={post.id} />
+              <Modal post={post} />
             </div>
 
-            <p>{post.message}</p>
+            <p className="mb-2">{post.message}</p>
+            <div className="flex justify-center">
+              <img src={post.imageUrl} width="750" />
+            </div>
           </div>
         ))}
     </>

@@ -4,7 +4,7 @@ export default function DeletePost({ postId }) {
   const router = useRouter();
 
   async function deletePost() {
-    await fetch(`http://localhost:3000/posts/${postId}/delete`, {
+    await fetch(`http://localhost:3000/posts/${postId}`, {
       method: "DELETE",
     });
     router.refresh();

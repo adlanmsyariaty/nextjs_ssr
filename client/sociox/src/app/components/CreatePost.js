@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 export default function CreatePost() {
   const [username, setUsername] = useState("");
   const [message, setMessage] = useState("");
+  const [file, setFile] = useState(null);
 
   const router = useRouter();
 
@@ -13,6 +14,38 @@ export default function CreatePost() {
     e.preventDefault();
 
     try {
+      let filePath = null;
+      if (file) {
+        console.log(file);
+        const uploadRes = await fetch(
+          `http://localhost:3000/posts/presigned-url`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              fileType: file.type,
+            }),
+          }
+        );
+        const uploadData = await uploadRes.json();
+        if (!uploadData.success) {
+          throw data.message;
+        }
+
+        let presignedUrl = uploadData.data.url;
+        const result = await fetch(presignedUrl, {
+          method: "PUT",
+          headers: {
+            "Content-Type": file.type,
+          },
+          body: file,
+        });
+        console.log(result);
+        filePath = uploadData.data.filePath;
+      }
+
       const res = await fetch(`http://localhost:3000/posts`, {
         method: "POST",
         headers: {
@@ -21,10 +54,11 @@ export default function CreatePost() {
         body: JSON.stringify({
           username: username ? username : "anonymous",
           message: message,
+          filePath: filePath,
         }),
       });
       const data = await res.json();
-      if (!data.status) {
+      if (!data.success) {
         throw data.message;
       }
     } catch (error) {
@@ -32,12 +66,13 @@ export default function CreatePost() {
     } finally {
       setMessage("");
       setUsername("");
+      setFile(null);
       router.refresh();
     }
   }
 
   return (
-    <div className="flex bg-emerald-100 w-full h-[140px] p-2">
+    <div className="flex bg-emerald-100 w-full h-[200px] p-2">
       <div className="w-[10%] p-2">
         <img
           src="/blank-profile-picture-973460_1280.png"
@@ -56,15 +91,22 @@ export default function CreatePost() {
             onChange={(e) => setMessage(e.target.value)}
           />
         </div>
-        <div className="flex h-14 justify-between mt-2">
-          <input
-            className="outline-none pl-3 bg-emerald-50 rounded-xl w-40"
-            placeholder="Username..."
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-          />
+        <div className="flex h-20 justify-between mt-2 items-center">
+          <div className="flex items-center">
+            <input
+              type="file"
+              className="file-input w-[280px] max-w-x bg-emerald-50 mr-2 text-gray-400 h-[36px]"
+              onChange={(e) => setFile(e.target.files[0])}
+            />
+            <input
+              className="outline-none pl-3 bg-emerald-50 rounded-lg w-40 h-[36px]"
+              placeholder="Username..."
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+            />
+          </div>
           <button
-            className="bg-teal-400 hover:bg-teal-500 text-white font-bold py-1 px-2 rounded-xl"
+            className="bg-teal-400 hover:bg-teal-500 text-white font-bold py-1 px-3 rounded-xl h-[36px]"
             onClick={submitPost}
           >
             Post

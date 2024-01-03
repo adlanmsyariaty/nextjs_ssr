@@ -1,4 +1,8 @@
-const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
+const {
+  S3Client,
+  PutObjectCommand,
+  GetObjectCommand,
+} = require("@aws-sdk/client-s3");
 const { Post } = require("../models");
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 // const aws = require("aws-sdk");
@@ -6,10 +10,11 @@ const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 class Controller {
   static async createPost(req, res, next) {
     try {
-      const { username, message } = req.body;
+      const { username, message, filePath } = req.body;
       const newPost = await Post.create({
         username,
         message,
+        imageUrl: filePath,
         createdBy: username,
       });
       res.status(201).json({
@@ -37,7 +42,33 @@ class Controller {
       }
       const posts = await Post.findAndCountAll(filter);
 
-      let postResp = posts.rows.map((post) => post.dataValues);
+      const accessKeyId = process.env.AWS_ACCESS_KEY;
+      const secretAccessKey = process.env.AWS_SECRET_KEY;
+      const bucket = process.env.AWS_BUCKET;
+      const region = process.env.AWS_REGION;
+      const client = new S3Client({
+        region,
+        credentials: {
+          accessKeyId: accessKeyId,
+          secretAccessKey: secretAccessKey,
+        },
+      });
+
+      let postResp = [];
+      for (let i = 0; i < posts.rows.length; i++) {
+        const element = posts.rows[i];
+        if (element.imageUrl) {
+          const command = new GetObjectCommand({
+            Bucket: bucket,
+            Key: element.imageUrl,
+          });
+          const presignedUrl = await getSignedUrl(client, command, {
+            expiresIn: 3600,
+          });
+          element.imageUrl = presignedUrl;
+        }
+        postResp.push(element);
+      }
 
       res.status(200).json({
         success: true,
@@ -84,13 +115,48 @@ class Controller {
       next(error);
     }
   }
+  static async updatePost(req, res, next) {
+    try {
+      const postId = req.params.id;
+      const { message } = req.body;
+      console.log(message);
+      const postData = await Post.findOne({
+        where: {
+          id: postId,
+          isActive: true,
+        },
+      });
+
+      if (!postData) throw { name: "POST_NOT_FOUND" };
+
+      await Post.update(
+        { message: message },
+        {
+          where: {
+            id: postId,
+          },
+          returning: false,
+        }
+      );
+      console.log("postId", postId);
+      res.status(200).json({
+        success: true,
+        data: {
+          id: postId,
+        },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
   static async createUploadPresignedUrl(req, res, next) {
     try {
+      const { fileType } = req.body;
       const accessKeyId = process.env.AWS_ACCESS_KEY;
       const secretAccessKey = process.env.AWS_SECRET_KEY;
       const bucket = process.env.AWS_BUCKET;
       const region = process.env.AWS_REGION;
-      const key = new Date().getTime() + ".jpg";
+      const key = new Date().getTime() + "." + fileType.split("/")[1];
       const client = new S3Client({
         region,
         credentials: {
@@ -108,6 +174,7 @@ class Controller {
         success: true,
         data: {
           url: presignedUrl,
+          filePath: key,
         },
       });
     } catch (error) {
