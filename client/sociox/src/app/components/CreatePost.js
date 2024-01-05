@@ -42,7 +42,6 @@ export default function CreatePost() {
           },
           body: file,
         });
-        console.log(result);
         filePath = uploadData.data.filePath;
       }
 
@@ -92,14 +91,14 @@ export default function CreatePost() {
           />
         </div>
         <div className="flex h-20 justify-between mt-2 items-center">
-          <div className="flex items-center">
+          <div className="flex items-start flex-wrap">
             <input
               type="file"
-              className="file-input w-[280px] max-w-x bg-emerald-50 mr-2 text-gray-400 h-[36px]"
+              className="file-input w-[280px] max-w-x bg-emerald-50 mr-2 text-gray-400 h-[36px] my-1"
               onChange={(e) => setFile(e.target.files[0])}
             />
             <input
-              className="outline-none pl-3 bg-emerald-50 rounded-lg w-40 h-[36px]"
+              className="outline-none pl-3 bg-emerald-50 rounded-lg w-40 h-[36px] my-1"
               placeholder="Username..."
               value={username}
               onChange={(e) => setUsername(e.target.value)}
