@@ -63,6 +63,11 @@ module.exports = (sequelize, DataTypes) => {
         beforeCreate(instance) {
           instance.password = hashPassword(instance.password);
         },
+        beforeUpdate(instance) {
+          if (instance.password) {
+            instance.password = hashPassword(instance.password);
+          }
+        },
       },
       modelName: "User",
     }

@@ -35,9 +35,22 @@ export default function Register() {
         }),
       });
       const data = await res.json();
-
       if (!data.success) {
         throw data.message;
+      }
+
+      const otpRes = await fetch(`http://localhost:3000/otp/send`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          phoneNumber,
+        }),
+      });
+      const otpData = await otpRes.json();
+      if (!otpData.success) {
+        throw otpData.message;
       }
 
       document.getElementById("verification").showModal();
@@ -46,7 +59,31 @@ export default function Register() {
     } finally {
       setUsername("");
       setPassword("");
+      router.refresh();
+    }
+  }
+
+  async function verify() {
+    try {
+      const verifyRes = await fetch(`http://localhost:3000/otp/verify`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          phoneNumber,
+          otp,
+        }),
+      });
+      const verifyData = await verifyRes.json();
+      if (!verifyData.success) {
+        throw verifyData.message;
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
       setPhoneNumber("");
+      setOtp("");
       router.refresh();
     }
   }
@@ -55,7 +92,7 @@ export default function Register() {
     <>
       <p
         className={
-          "text-center text-white text-[16px] font-bold " +
+          "text-center text-white text-[16px] font-bold cursor-pointer " +
           (isLoggedIn ? "hidden" : "")
         }
         onClick={showModal}
@@ -63,7 +100,7 @@ export default function Register() {
         Register
       </p>
       <dialog id="register" className="modal">
-        <div className="modal-box w-11/12 max-w-5xl">
+        <div className="modal-box w-11/12 max-w-[400px]">
           <input
             className="w-full p-3 bg-emerald-50 rounded-xl outline-none display scroll-m-0 border-emerald-200 border-2 mt-4"
             placeholder="Username"
@@ -95,7 +132,7 @@ export default function Register() {
       </dialog>
 
       <dialog id="verification" className="modal">
-        <div className="modal-box w-11/12 max-w-5xl">
+        <div className="modal-box w-11/12 max-w-[400px]">
           <p className="mb-2">We send OTP Code to your number</p>
           <input
             className="w-full p-3 bg-emerald-50 rounded-xl outline-none display scroll-m-0 border-emerald-200 border-2 mt-4"
@@ -106,7 +143,9 @@ export default function Register() {
           />
           <div className="modal-action">
             <form method="dialog">
-              <button className="btn mr-2">Verify</button>
+              <button className="btn mr-2" onClick={verify}>
+                Verify
+              </button>
               <button className="btn">Cancel</button>
             </form>
           </div>

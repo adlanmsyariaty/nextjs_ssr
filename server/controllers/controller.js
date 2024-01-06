@@ -193,24 +193,50 @@ class Controller {
     try {
       const { username, password, phoneNumber, imagePath } = req.body;
 
-      // ADD LOGIC TO COVER IF THERE IS EXISTING PHONE NUMBER
-
-      const newUser = await User.create(
-        {
-          username,
-          password,
+      let user = await User.findOne({
+        where: {
           phoneNumber,
-          imagePath,
-          createdBy: "system",
         },
-        {
-          transaction: t,
-        }
-      );
+      });
+
+      if (!user) {
+        user = await User.create(
+          {
+            username,
+            password,
+            phoneNumber,
+            imagePath,
+            createdBy: "system",
+          },
+          {
+            transaction: t,
+          }
+        );
+      } else {
+        await User.update(
+          {
+            username,
+            password,
+            imagePath,
+            updatedBy: "system",
+          },
+          {
+            where: {
+              id: user.id,
+            },
+            returning: false,
+            individualHooks: true,
+          },
+          {
+            transaction: t,
+          }
+        );
+      }
+
       await t.commit();
       res.status(201).json({
         success: true,
-        data: newUser,
+        data: user,
       });
     } catch (error) {
       await t.rollback();

@@ -21,7 +21,7 @@ export default function Logout() {
   return (
     <p
       className={
-        "text-center text-white text-[16px] font-bold ml-4 " +
+        "text-center text-white text-[16px] font-bold ml-4 cursor-pointer " +
         (isLoggedIn ? "" : "hidden")
       }
       onClick={logout}

@@ -52,14 +52,14 @@ export default function Login() {
       <p
         onClick={showModal}
         className={
-          "text-center text-white text-[16px] font-bold mr-4 " +
+          "text-center text-white text-[16px] font-bold mr-4 cursor-pointer " +
           (isLoggedIn ? "hidden" : "")
         }
       >
         Login
       </p>
       <dialog id="login" className="modal">
-        <div className="modal-box w-11/12 max-w-5xl">
+        <div className="modal-box w-11/12 max-w-[400px]">
           <input
             className="w-full p-3 bg-emerald-50 rounded-xl outline-none display scroll-m-0 border-emerald-200 border-2 mt-4"
             placeholder="Username"

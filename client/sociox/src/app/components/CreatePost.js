@@ -71,7 +71,6 @@ export default function CreatePost() {
       console.log(error);
     } finally {
       setMessage("");
-      setUsername("");
       setFile(null);
       router.refresh();
     }
