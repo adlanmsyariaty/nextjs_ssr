@@ -1,11 +1,14 @@
 import { useRouter } from "next/navigation";
 
-export default function DeletePost({ postId }) {
+export default function DeletePost({ postId, accessToken }) {
   const router = useRouter();
 
   async function deletePost() {
     await fetch(`http://localhost:3000/posts/${postId}`, {
       method: "DELETE",
+      headers: {
+        access_token: accessToken,
+      },
     });
     router.refresh();
   }

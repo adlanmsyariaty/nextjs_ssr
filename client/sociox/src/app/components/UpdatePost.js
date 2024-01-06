@@ -1,7 +1,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 
-export default function UpdatePost({ post }) {
+export default function UpdatePost({ post, accessToken }) {
   const [message, setMessage] = useState();
 
   const router = useRouter();
@@ -23,6 +23,7 @@ export default function UpdatePost({ post }) {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
+        access_token: accessToken,
       },
       body: JSON.stringify({
         message,

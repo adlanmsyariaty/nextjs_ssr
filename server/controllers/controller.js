@@ -191,6 +191,7 @@ class Controller {
           password,
           phoneNumber,
           imagePath,
+          createdBy: "system"
         },
         {
           transaction: t,

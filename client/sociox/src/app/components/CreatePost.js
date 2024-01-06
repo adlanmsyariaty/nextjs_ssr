@@ -1,12 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function CreatePost() {
   const [username, setUsername] = useState("");
   const [message, setMessage] = useState("");
+  const [accessToken, setAccessToken] = useState("");
   const [file, setFile] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    setIsLoggedIn(token ? true : false);
+    setAccessToken(token);
+  });
 
   const router = useRouter();
 
@@ -22,6 +30,7 @@ export default function CreatePost() {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
+              access_token: accessToken,
             },
             body: JSON.stringify({
               fileType: file.type,
@@ -48,6 +57,7 @@ export default function CreatePost() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          access_token: accessToken,
         },
         body: JSON.stringify({
           username: username ? username : "anonymous",
@@ -70,7 +80,12 @@ export default function CreatePost() {
   }
 
   return (
-    <div className="flex bg-emerald-100 w-full h-[200px] p-2">
+    <div
+      className={
+        "flex bg-emerald-100 w-full h-[200px] p-2 " +
+        (isLoggedIn ? "" : "hidden")
+      }
+    >
       <div className="w-[10%] p-2">
         <img
           src="/blank-profile-picture-973460_1280.png"

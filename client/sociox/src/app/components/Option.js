@@ -1,12 +1,22 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import DeletePost from "./DeletePost";
 import UpdatePost from "./UpdatePost";
 
 export default function Modal({ post }) {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [accessToken, setAccessToken] = useState("");
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    setIsLoggedIn(token ? true : false);
+    setAccessToken(token);
+  });
+
   return (
     <>
-      <div className="dropdown dropdown-end">
+      <div className={"dropdown dropdown-end " + (isLoggedIn ? "" : "hidden")}>
         <div tabIndex={0} role="button">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -27,8 +37,8 @@ export default function Modal({ post }) {
           tabIndex={0}
           className="dropdown-content z-[1] menu p-2 shadow-lg rounded-box w-40 bg-teal-50"
         >
-          <UpdatePost post={post} />
-          <DeletePost postId={post.id} />
+          <UpdatePost post={post} accessToken={accessToken} />
+          <DeletePost postId={post.id} accessToken={accessToken} />
         </ul>
       </div>
     </>
