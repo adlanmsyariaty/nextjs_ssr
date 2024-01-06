@@ -1,5 +1,5 @@
 # Stage 1: Build the application
-FROM node:14 as builder
+FROM node:18-alpine as builder
 
 WORKDIR /usr/src/app
 
@@ -12,7 +12,7 @@ COPY . .
 # Run any build steps here (e.g., building TypeScript, running tests)
 
 # Stage 2: Create a lightweight image
-FROM node:14-alpine
+FROM node:18-alpine
 
 WORKDIR /usr/src/app
 
