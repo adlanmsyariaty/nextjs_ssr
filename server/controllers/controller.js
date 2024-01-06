@@ -3,9 +3,10 @@ const {
   PutObjectCommand,
   GetObjectCommand,
 } = require("@aws-sdk/client-s3");
-const { Post } = require("../models");
+const { Post, User, sequelize } = require("../models");
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
-// const aws = require("aws-sdk");
+const { comparePasswordWithHash } = require("../helpers/bcrypt");
+const { tokenGenerator } = require("../helpers/jwt");
 
 class Controller {
   static async createPost(req, res, next) {
@@ -119,7 +120,6 @@ class Controller {
     try {
       const postId = req.params.id;
       const { message } = req.body;
-      console.log(message);
       const postData = await Post.findOne({
         where: {
           id: postId,
@@ -138,7 +138,7 @@ class Controller {
           returning: false,
         }
       );
-      console.log("postId", postId);
+
       res.status(200).json({
         success: true,
         data: {
@@ -178,6 +178,75 @@ class Controller {
         },
       });
     } catch (error) {
+      next(error);
+    }
+  }
+  static async register(req, res, next) {
+    const t = await sequelize.transaction();
+    try {
+      const { username, password, phoneNumber, imagePath } = req.body;
+      const newUser = await User.create(
+        {
+          username,
+          password,
+          phoneNumber,
+          imagePath,
+        },
+        {
+          transaction: t,
+        }
+      );
+      await t.commit();
+      res.status(201).json({
+        success: true,
+        data: newUser,
+      });
+    } catch (error) {
+      await t.rollback();
+      next(error);
+    }
+  }
+
+  static async login(req, res, next) {
+    const t = await sequelize.transaction();
+    try {
+      const { username, password } = req.body;
+      if (!username) throw { name: "USERNAME_IS_REQUIRED" };
+      if (!password) throw { name: "PASSWORD_IS_REQUIRED" };
+
+      const selectedUser = await User.findOne({
+        where: {
+          username: username,
+        },
+        transaction: t,
+      });
+      if (!selectedUser) {
+        throw { name: "INVALID_USER" };
+      }
+
+      const passwordCheck = comparePasswordWithHash(
+        password,
+        selectedUser.password
+      );
+      if (!passwordCheck) {
+        throw { name: "INVALID_USER" };
+      }
+      const payload = {
+        id: selectedUser.id,
+        username: selectedUser.username,
+        imagePath: selectedUser.imagePath,
+      };
+
+      const token = tokenGenerator(payload);
+      await t.commit();
+      res.status(200).json({
+        success: true,
+        data: {
+          accessToken: token,
+        },
+      });
+    } catch (error) {
+      await t.rollback();
       next(error);
     }
   }

@@ -16,7 +16,6 @@ export default function CreatePost() {
     try {
       let filePath = null;
       if (file) {
-        console.log(file);
         const uploadRes = await fetch(
           `http://localhost:3000/posts/presigned-url`,
           {
