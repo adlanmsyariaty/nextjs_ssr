@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import Swal from "sweetalert2";
 
 export default function Login() {
   const [username, setUsername] = useState("");
@@ -39,7 +40,11 @@ export default function Login() {
 
       localStorage.setItem("token", data.data.accessToken);
     } catch (error) {
-      console.log(error);
+      Swal.fire({
+        title: "Failed",
+        text: error,
+        timer: 2500,
+      });
     } finally {
       setUsername("");
       setPassword("");

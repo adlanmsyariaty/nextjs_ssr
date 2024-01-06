@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import Swal from "sweetalert2";
 
 export default function Register() {
   const [username, setUsername] = useState("");
@@ -55,7 +56,11 @@ export default function Register() {
 
       document.getElementById("verification").showModal();
     } catch (error) {
-      console.log(error);
+      Swal.fire({
+        title: "Failed",
+        text: error,
+        timer: 2500,
+      });
     } finally {
       setUsername("");
       setPassword("");
@@ -80,7 +85,11 @@ export default function Register() {
         throw verifyData.message;
       }
     } catch (error) {
-      console.log(error);
+      Swal.fire({
+        title: "Failed",
+        text: error,
+        timer: 2500,
+      });
     } finally {
       setPhoneNumber("");
       setOtp("");

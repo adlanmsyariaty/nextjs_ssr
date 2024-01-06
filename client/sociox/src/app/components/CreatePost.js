@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Swal from "sweetalert2";
 
 export default function CreatePost() {
   const [message, setMessage] = useState("");
@@ -68,7 +69,11 @@ export default function CreatePost() {
         throw data.message;
       }
     } catch (error) {
-      console.log(error);
+      Swal.fire({
+        title: "Failed",
+        text: error,
+        timer: 2500,
+      });
     } finally {
       setMessage("");
       setFile(null);
