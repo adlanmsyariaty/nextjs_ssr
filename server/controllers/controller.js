@@ -7,11 +7,18 @@ const { Post, User, sequelize } = require("../models");
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 const { comparePasswordWithHash } = require("../helpers/bcrypt");
 const { tokenGenerator } = require("../helpers/jwt");
+const { generateOtpNumber } = require("../helpers/util");
+
+const accountSid = process.env.TWILIO_ACCOUNT_SID;
+const authToken = process.env.TWILIO_AUTH_TOKEN;
+const twilioClient = require("twilio")(accountSid, authToken);
 
 class Controller {
   static async createPost(req, res, next) {
     try {
-      const { username, message, filePath } = req.body;
+      const { message, filePath } = req.body;
+      const { username } = req.user;
+
       const newPost = await Post.create({
         username,
         message,
@@ -185,13 +192,16 @@ class Controller {
     const t = await sequelize.transaction();
     try {
       const { username, password, phoneNumber, imagePath } = req.body;
+
+      // ADD LOGIC TO COVER IF THERE IS EXISTING PHONE NUMBER
+
       const newUser = await User.create(
         {
           username,
           password,
           phoneNumber,
           imagePath,
-          createdBy: "system"
+          createdBy: "system",
         },
         {
           transaction: t,
@@ -218,6 +228,7 @@ class Controller {
       const selectedUser = await User.findOne({
         where: {
           username: username,
+          status: "VALIDATED",
         },
         transaction: t,
       });
@@ -248,6 +259,81 @@ class Controller {
       });
     } catch (error) {
       await t.rollback();
+      next(error);
+    }
+  }
+  static async sendOtp(req, res, next) {
+    try {
+      const { phoneNumber } = req.body;
+      const twilioPhoneNumber = process.env.TWILIO_PHONE_NUMBER;
+
+      const user = await User.findOne({
+        where: {
+          phoneNumber,
+        },
+      });
+      if (!user) {
+        throw { name: "USER_NOT_FOUND" };
+      }
+
+      const otp = generateOtpNumber();
+      const message = await twilioClient.messages.create({
+        body: `Your OTP is ${otp}`,
+        from: twilioPhoneNumber,
+        to: phoneNumber.replace(/^0/, "+62"),
+      });
+
+      await User.update(
+        { otp: otp },
+        {
+          where: {
+            id: user.id,
+          },
+          returning: false,
+        }
+      );
+
+      res.status(200).json({
+        success: true,
+        data: {
+          sid: message.sid,
+        },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+  static async verifyOtp(req, res, next) {
+    try {
+      const { phoneNumber, otp } = req.body;
+
+      const user = await User.findOne({
+        where: {
+          phoneNumber,
+        },
+      });
+      if (!user) {
+        throw { name: "USER_NOT_FOUND" };
+      }
+
+      if (user.otp !== otp) {
+        throw { name: "INVALID_OTP" };
+      }
+
+      await User.update(
+        { status: "VALIDATED" },
+        {
+          where: {
+            id: user.id,
+          },
+          returning: false,
+        }
+      );
+
+      res.status(200).json({
+        success: true,
+      });
+    } catch (error) {
       next(error);
     }
   }

@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function CreatePost() {
-  const [username, setUsername] = useState("");
   const [message, setMessage] = useState("");
   const [accessToken, setAccessToken] = useState("");
   const [file, setFile] = useState(null);
@@ -60,7 +59,6 @@ export default function CreatePost() {
           access_token: accessToken,
         },
         body: JSON.stringify({
-          username: username ? username : "anonymous",
           message: message,
           filePath: filePath,
         }),
@@ -111,19 +109,15 @@ export default function CreatePost() {
               className="file-input w-[280px] max-w-x bg-emerald-50 mr-2 text-gray-400 h-[36px] my-1"
               onChange={(e) => setFile(e.target.files[0])}
             />
-            <input
-              className="outline-none pl-3 bg-emerald-50 rounded-lg w-40 h-[36px] my-1"
-              placeholder="Username..."
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-            />
           </div>
-          <button
-            className="bg-teal-400 hover:bg-teal-500 text-white font-bold py-1 px-3 rounded-xl h-[36px]"
-            onClick={submitPost}
-          >
-            Post
-          </button>
+          <div className="flex h-full items-center">
+            <button
+              className="bg-teal-400 hover:bg-teal-500 text-white font-bold py-1 px-3 rounded-xl h-[36px]"
+              onClick={submitPost}
+            >
+              Post
+            </button>
+          </div>
         </div>
       </div>
     </div>

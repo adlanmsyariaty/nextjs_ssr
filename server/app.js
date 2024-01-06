@@ -16,8 +16,10 @@ app.use(express.urlencoded({ extended: true }));
 app.post("/register", Controller.register);
 app.post("/login", Controller.login);
 
-app.get("/posts", Controller.getAllPost);
+app.post("/otp/send", Controller.sendOtp);
+app.post("/otp/verify", Controller.verifyOtp);
 
+app.get("/posts", Controller.getAllPost);
 app.use(authentication);
 app.post("/posts", Controller.createPost);
 app.delete("/posts/:id", Controller.deletePost);

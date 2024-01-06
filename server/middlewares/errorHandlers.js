@@ -5,20 +5,30 @@ const errorHandlers = (err, req, res, next) => {
       success: false,
       message: err,
     });
-  } else if (err.name === "POST_NOT_FOUND") {
-    res.status(404).json({
-      success: false,
-      message: "Post not found",
-    });
   } else if (err.name === "SequelizeUniqueConstraintError") {
     res.status(400).json({
       success: false,
       message: "Username is already registered",
     });
+  } else if (err.name === "POST_NOT_FOUND") {
+    res.status(404).json({
+      success: false,
+      message: "Post not found",
+    });
+  } else if (err.name === "USER_NOT_FOUND") {
+    res.status(404).json({
+      success: false,
+      message: "User not found",
+    });
   } else if (err.name === "INVALID_USER") {
     res.status(401).json({
       success: false,
       message: "Invalid username/password",
+    });
+  } else if (err.name === "INVALID_OTP") {
+    res.status(400).json({
+      success: false,
+      message: "Invalid OTP",
     });
   } else if (err.name === "UNAUTHORIZED") {
     res.status(401).json({

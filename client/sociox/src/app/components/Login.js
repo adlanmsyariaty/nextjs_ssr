@@ -70,6 +70,7 @@ export default function Login() {
             className="w-full p-3 bg-emerald-50 rounded-xl outline-none display scroll-m-0 border-emerald-200 border-2 mt-4"
             placeholder="Password"
             value={password}
+            type="password"
             onChange={(e) => setPassword(e.target.value)}
           />
           <div className="modal-action">

@@ -7,6 +7,7 @@ export default function Register() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [otp, setOtp] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
@@ -20,10 +21,8 @@ export default function Register() {
     document.getElementById("register").showModal();
   }
 
-  async function login() {
+  async function register() {
     try {
-      let imagePath = "";
-
       const res = await fetch(`http://localhost:3000/register`, {
         method: "POST",
         headers: {
@@ -33,7 +32,6 @@ export default function Register() {
           username,
           password,
           phoneNumber,
-          imagePath,
         }),
       });
       const data = await res.json();
@@ -41,6 +39,8 @@ export default function Register() {
       if (!data.success) {
         throw data.message;
       }
+
+      document.getElementById("verification").showModal();
     } catch (error) {
       console.log(error);
     } finally {
@@ -74,6 +74,7 @@ export default function Register() {
             className="w-full p-3 bg-emerald-50 rounded-xl outline-none display scroll-m-0 border-emerald-200 border-2 mt-4"
             placeholder="Password"
             value={password}
+            type="password"
             onChange={(e) => setPassword(e.target.value)}
           />
           <input
@@ -84,9 +85,28 @@ export default function Register() {
           />
           <div className="modal-action">
             <form method="dialog">
-              <button className="btn mr-2" onClick={login}>
+              <button className="btn mr-2" onClick={register}>
                 Register
               </button>
+              <button className="btn">Cancel</button>
+            </form>
+          </div>
+        </div>
+      </dialog>
+
+      <dialog id="verification" className="modal">
+        <div className="modal-box w-11/12 max-w-5xl">
+          <p className="mb-2">We send OTP Code to your number</p>
+          <input
+            className="w-full p-3 bg-emerald-50 rounded-xl outline-none display scroll-m-0 border-emerald-200 border-2 mt-4"
+            placeholder="OTP"
+            maxLength={6}
+            value={otp}
+            onChange={(e) => setOtp(e.target.value)}
+          />
+          <div className="modal-action">
+            <form method="dialog">
+              <button className="btn mr-2">Verify</button>
               <button className="btn">Cancel</button>
             </form>
           </div>

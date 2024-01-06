@@ -15,6 +15,7 @@ const authentication = async (req, res, next) => {
     } else {
       req.user = {
         id: selectedUser.id,
+        username: selectedUser.username,
       };
     }
     next();
