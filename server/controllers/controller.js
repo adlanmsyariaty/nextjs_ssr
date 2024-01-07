@@ -9,9 +9,12 @@ const { comparePasswordWithHash } = require("../helpers/bcrypt");
 const { tokenGenerator } = require("../helpers/jwt");
 const { generateOtpNumber } = require("../helpers/util");
 
-const accountSid = process.env.TWILIO_ACCOUNT_SID;
-const authToken = process.env.TWILIO_AUTH_TOKEN;
-const twilioClient = require("twilio")(accountSid, authToken);
+// const accountSid = process.env.TWILIO_ACCOUNT_SID;
+// const authToken = process.env.TWILIO_AUTH_TOKEN;
+// const twilioClient = require("twilio")(accountSid, authToken);
+
+const infobipBaseUrl = process.env.INFOBIP_BASE_URL;
+const infobipApiKey = process.env.INFOBIP_API_KEY;
 
 class Controller {
   static async createPost(req, res, next) {
@@ -289,10 +292,11 @@ class Controller {
     }
   }
   static async sendOtp(req, res, next) {
-    try {
-      const { phoneNumber } = req.body;
-      const twilioPhoneNumber = process.env.TWILIO_PHONE_NUMBER;
+    const { phoneNumber } = req.body;
+    const otp = generateOtpNumber();
+    // const twilioPhoneNumber = process.env.TWILIO_PHONE_NUMBER;
 
+    try {
       const user = await User.findOne({
         where: {
           phoneNumber,
@@ -302,12 +306,12 @@ class Controller {
         throw { name: "USER_NOT_FOUND" };
       }
 
-      const otp = generateOtpNumber();
-      const message = await twilioClient.messages.create({
-        body: `Your OTP is ${otp}`,
-        from: twilioPhoneNumber,
-        to: phoneNumber.replace(/^0/, "+62"),
-      });
+      // TWILIO SERVICE
+      // const message = await twilioClient.messages.create({
+      //   body: `Your OTP is ${otp}`,
+      //   from: twilioPhoneNumber,
+      //   to: phoneNumber.replace(/^0/, "+62"),
+      // });
 
       await User.update(
         { otp: otp },
@@ -318,11 +322,49 @@ class Controller {
           returning: false,
         }
       );
+    } catch (error) {
+      return next(error);
+    }
+
+    try {
+      // INFOBIP SERVICE
+      const smsRes = await fetch(
+        `https://${infobipBaseUrl}/sms/2/text/advanced`,
+        {
+          method: "POST",
+          timeout: 0,
+          headers: {
+            Authorization: `App ${infobipApiKey}`,
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify({
+            messages: [
+              {
+                destinations: [
+                  {
+                    to: phoneNumber.replace(/^0/, "62"),
+                  },
+                ],
+                from: "SocioX OTP",
+                text: `Your OTP is ${otp}`,
+              },
+            ],
+          }),
+        }
+      );
+      const smsData = await smsRes.json();
+      if (smsRes.status !== 200) {
+        throw {
+          name: "FAILED_SMS_SERVICE",
+          error: smsData.requestError.serviceException.text,
+        };
+      }
 
       res.status(200).json({
         success: true,
         data: {
-          sid: message.sid,
+          messageId: smsData.messages[0].messageId,
         },
       });
     } catch (error) {
