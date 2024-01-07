@@ -2,7 +2,8 @@
 
 This Repo includes backend using NodeJS and frontend using NextJS. We use Server Side Rendering.
 
-This apps need to integrate to Twillio as SMS Service (third party API).
+This apps need to integrate to InfoBIP as SMS Service (third party API).
+https://portal.infobip.com/homepage
 
 ## How to Run
 
